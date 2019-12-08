@@ -9,6 +9,7 @@ import math
 #import RBFNetwork as rbf
 import FeedforwardNetwork as ffn
 import EvolutionaryAlgorithms as ea
+import PSO
 
 #--------------------DATA-MANIPULATION--------------------#
 def openFiles(dataFile):
@@ -123,7 +124,7 @@ def trainAndTest(chunked_data, clss_list, k, use_regression, num_layers, hidden_
     mlp_PSO_1_missed = []
     mlp_PSO_2_missed = []
     for testing in range(10):
-        print("Fold: ",testing,"of 10 fold cross validation")
+        print("\n\n\nFold: ",testing,"of 10 fold cross validation")
         training_set = []
 
         testing_set = chunked_data[testing]
@@ -135,112 +136,178 @@ def trainAndTest(chunked_data, clss_list, k, use_regression, num_layers, hidden_
 
         validation_index = int((float(len(training_set)) * 8 / 10)) - 1
         if use_regression:
-            mlp_GA_0 = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
-            ea.generateFFNGA(mlp_GA_0, training_set[:validation_index], training_set[validation_index:],
+            # 0-layer
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:0], eta, alpha_momentum, iterations)
+            mlp_BP_0_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
                              [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
-                             0.5, 0.5, 0.1, 15, 130)
-            mlp_GA_1 = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
-            ea.generateFFNGA(mlp_GA_1, training_set[:validation_index], training_set[validation_index:],
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=40,
+                             max_generations=1000)
+            mlp_GA_0_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=1000)
+            mlp_DE_0_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=40, max_time_steps=8000)
+            mlp_PSO_0_missed.append(ms.testRegressor(mlp, testing_set))
+            # 1-layer
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:1], eta, alpha_momentum, iterations)
+            mlp_BP_1_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
                              [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
-                             0.5, 0.5, 0.1, 15, 130)
-            mlp_GA_2 = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
-            ea.generateFFNGA(mlp_GA_2, training_set[:validation_index], training_set[validation_index:],
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=40,
+                             max_generations=300)
+            mlp_GA_1_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+            mlp_DE_1_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=40, max_time_steps=80)
+            mlp_PSO_1_missed.append(ms.testRegressor(mlp, testing_set))
+            # 2-layer
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:2], eta, alpha_momentum, iterations)
+            mlp_BP_2_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
                              [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
-                             0.5, 0.5, 0.1, 15, 130)
-            mlp_GA_0_missed.append(ms.testRegressor(mlp_GA_0, testing_set))
-            mlp_GA_1_missed.append(ms.testRegressor(mlp_GA_1, testing_set))
-            mlp_GA_2_missed.append(ms.testRegressor(mlp_GA_2, testing_set))
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=40,
+                             max_generations=300)
+            mlp_GA_2_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+            mlp_DE_2_missed.append(ms.testRegressor(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=40, max_time_steps=80)
+            mlp_PSO_2_missed.append(ms.testRegressor(mlp, testing_set))
+
         # classification
         else:
-            if tune:
-                # train multi layer perceptrons
-                mlp_0 = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                mlp_0.backpropogation(training_set, [], eta, alpha_momentum, iterations)
-                mlp_1 = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                mlp_1.backpropogation(training_set, hidden_layer_nodes[:1], eta, alpha_momentum, iterations)
-                mlp_2 = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                mlp_2.backpropogation(training_set, hidden_layer_nodes[:2], eta, alpha_momentum, iterations)
-                # test multi layer perceptrons
-                mlp_0_missed.append(ms.testProbabilisticClassifier(mlp_0, testing_set))
-                mlp_1_missed.append(ms.testProbabilisticClassifier(mlp_1, testing_set))
-                mlp_2_missed.append(ms.testProbabilisticClassifier(mlp_2, testing_set))
-            else:
-                mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                mlp.backpropogation(training_set, hidden_layer_nodes[:num_layers], eta, alpha_momentum, iterations)
-                best_mlp_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
-            # train autoencoders
-            ae_1 = ffn.FeedforwardNetwork(len(chunked_data[0][0])-1, clss_list, "autoencoder", True, False)
-            ae_1.regularizeAutoencoder(lmbda)
-            ae_1.backpropogation(training_set, hidden_layer_nodes[:1], eta, alpha_momentum, iterations)
-            # Autoencoder 1 stacked MLP
-            if not tune:
-                ae_1_mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                ae_1.addFFNetwork(ae_1_mlp, True, training_set, hidden_layer_nodes[:num_layers], eta, alpha_momentum, iterations)
+            # 0-layer
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:0], eta, alpha_momentum, iterations)
+            mlp_BP_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=60,
+                             max_generations=300)
+            mlp_GA_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+            mlp_DE_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=50, max_time_steps=80)
+            mlp_PSO_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            # 1-layer
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:1], eta, alpha_momentum, iterations)
+            mlp_BP_1_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=60,
+                             max_generations=300)
+            mlp_GA_1_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+            mlp_DE_1_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:1],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=50, max_time_steps=80)
+            mlp_PSO_1_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            # 2-layer
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            mlp.backpropogation(training_set, hidden_layer_nodes[:2], eta, alpha_momentum, iterations)
+            mlp_BP_2_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
+                             prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=60,
+                             max_generations=300)
+            mlp_GA_2_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
+                             [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+            mlp_DE_2_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
+            mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
+            PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
+                                    [len(chunks[0][0]) - 1] + hidden_layer_nodes[:2],
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=50, max_time_steps=80)
+            mlp_PSO_2_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
 
-            ae_2 = ffn.FeedforwardNetwork(len(chunked_data[0][0])-1, clss_list, "autoencoder", True, False)
-            ae_2.regularizeAutoencoder(lmbda)
-            ae_2.backpropogation(training_set, hidden_layer_nodes[:2], eta, alpha_momentum, iterations)
-            # Autoencoder 2 stacked MLP
-            if not tune:
-                ae_2_mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                ae_2.addFFNetwork(ae_2_mlp, True, training_set, hidden_layer_nodes[:num_layers], eta, alpha_momentum, iterations)
-
-            ae_3 = ffn.FeedforwardNetwork(len(chunked_data[0][0])-1, clss_list, "autoencoder", True, False)
-            ae_3.regularizeAutoencoder(lmbda)
-            #ae_3.tune(training_set[:validation_index], training_set[validation_index:], 3, [], 15, 150)
-            ae_3.backpropogation(training_set, hidden_layer_nodes, eta, alpha_momentum, iterations)
-            # Autoencoder 3 stacked MLP
-            if not tune:
-                ae_3_mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
-                ae_3.addFFNetwork(ae_3_mlp, True, training_set, hidden_layer_nodes[:num_layers], eta, alpha_momentum, iterations)
-
-            # test autoencoders
-            if tune:
-                ae_1_smape.append(ms.testAutoencoder(ae_1, testing_set))
-                ae_2_smape.append(ms.testAutoencoder(ae_2, testing_set))
-                ae_3_smape.append(ms.testAutoencoder(ae_3, testing_set))
-            else:
-                ae_1_mlp_missed.append(ms.testProbabilisticClassifier(ae_1, testing_set))
-                ae_2_mlp_missed.append(ms.testProbabilisticClassifier(ae_2, testing_set))
-                ae_3_mlp_missed.append(ms.testProbabilisticClassifier(ae_3, testing_set))
     if use_regression:
-        if tune:
-            ms.compareRegressors(mlp_GA_0_missed, mlp_GA_1_missed, "MLP 0-layer", "MLP 1-layer")
-            #ms.compareRegressors(mlp_0_missed, mlp_2_missed, "MLP 0-layer", "MLP 2-layer")
-            #ms.compareRegressors(mlp_1_missed, mlp_2_missed, "MLP 1-layer", "MLP 2-layer")
+        # 0-layer
+        ms.compareRegressors(mlp_BP_0_missed, mlp_GA_0_missed, "BP 0-layer", "GA 0-layer")
+        ms.compareRegressors(mlp_BP_0_missed, mlp_DE_0_missed, "BP 0-layer", "DE 0-layer")
+        ms.compareRegressors(mlp_BP_0_missed, mlp_PSO_0_missed, "BP 0-layer", "PSO 0-layer")
+        ms.compareRegressors(mlp_GA_0_missed, mlp_DE_0_missed, "GA 0-layer", "DE 0-layer")
+        ms.compareRegressors(mlp_GA_0_missed, mlp_PSO_0_missed, "GA 0-layer", "PSO 0-layer")
+        ms.compareRegressors(mlp_DE_0_missed, mlp_PSO_0_missed, "DE 0-layer", "PSO 0-layer")
 
-        else:
-            ms.compareRegressors(best_mlp_missed, ae_1_mlp_missed, "MLP", "MLP stacked on 1-layer Autoencoder")
-            ms.compareRegressors(best_mlp_missed, ae_2_mlp_missed, "MLP", "MLP stacked on 2-layer Autoencoder")
-            ms.compareRegressors(best_mlp_missed, ae_3_mlp_missed, "MLP", "MLP stacked on 3-layer Autoencoder")
+        # 1-layer
+        ms.compareRegressors(mlp_BP_1_missed, mlp_GA_1_missed, "BP 1-layer", "GA 1-layer")
+        ms.compareRegressors(mlp_BP_1_missed, mlp_DE_1_missed, "BP 1-layer", "DE 1-layer")
+        ms.compareRegressors(mlp_BP_1_missed, mlp_PSO_1_missed, "BP 1-layer", "PSO 1-layer")
+        ms.compareRegressors(mlp_GA_1_missed, mlp_DE_1_missed, "GA 1-layer", "DE 1-layer")
+        ms.compareRegressors(mlp_GA_1_missed, mlp_PSO_1_missed, "GA 1-layer", "PSO 1-layer")
+        ms.compareRegressors(mlp_DE_1_missed, mlp_PSO_1_missed, "DE 1-layer", "PSO 1-layer")
 
-            ms.compareRegressors(ae_1_mlp_missed, ae_2_mlp_missed, "MLP stacked on 1-layer Autoencoder", "MLP stacked on 2-layer Autoencoder")
-            ms.compareRegressors(ae_1_mlp_missed, ae_3_mlp_missed, "MLP stacked on 1-layer Autoencoder", "MLP stacked on 3-layer Autoencoder")
-
-            ms.compareRegressors(ae_2_mlp_missed, ae_3_mlp_missed, "MLP stacked on 2-layer Autoencoder","MLP stacked on 3-layer Autoencoder")
+        # 2-layer
+        ms.compareRegressors(mlp_BP_2_missed, mlp_GA_2_missed, "BP 2-layer", "GA 2-layer")
+        ms.compareRegressors(mlp_BP_2_missed, mlp_DE_2_missed, "BP 2-layer", "DE 2-layer")
+        ms.compareRegressors(mlp_BP_2_missed, mlp_PSO_2_missed, "BP 2-layer", "PSO 2-layer")
+        ms.compareRegressors(mlp_GA_2_missed, mlp_DE_2_missed, "GA 2-layer", "DE 2-layer")
+        ms.compareRegressors(mlp_GA_2_missed, mlp_PSO_2_missed, "GA 2-layer", "PSO 2-layer")
+        ms.compareRegressors(mlp_DE_2_missed, mlp_PSO_2_missed, "DE 2-layer", "PSO 2-layer")
     else:
-        if tune:
-            ms.compareProbabilisticClassifiers(mlp_0_missed, mlp_1_missed, "MLP 0-layer", "MLP 1-layer")
-            ms.compareProbabilisticClassifiers(mlp_0_missed, mlp_2_missed, "MLP 0-layer", "MLP 2-layer")
-            ms.compareProbabilisticClassifiers(mlp_1_missed, mlp_2_missed, "MLP 1-layer", "MLP 2-layer")
-            ae_1_smape_avg = 0
-            ae_2_smape_avg = 0
-            ae_3_smape_avg = 0
-            for i in range(10):
-                ae_1_smape_avg += ae_1_smape[i]
-                ae_2_smape_avg += ae_2_smape[i]
-                ae_3_smape_avg += ae_3_smape[i]
-            print("Autoencoder symmetric mean absolute percentage error:", ae_1_smape_avg / 10, ae_2_smape_avg / 10, ae_3_smape_avg / 10)
-        else:
-            ms.compareProbabilisticClassifiers(best_mlp_missed, ae_1_mlp_missed, "MLP", "MLP stacked on 1-layer Autoencoder")
-            ms.compareProbabilisticClassifiers(best_mlp_missed, ae_2_mlp_missed, "MLP", "MLP stacked on 2-layer Autoencoder")
-            ms.compareProbabilisticClassifiers(best_mlp_missed, ae_3_mlp_missed, "MLP", "MLP stacked on 3-layer Autoencoder")
+        # 0-layer
+        ms.compareProbabilisticClassifiers(mlp_BP_0_missed, mlp_GA_0_missed, "BP 0-layer", "GA 0-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_0_missed, mlp_DE_0_missed, "BP 0-layer", "DE 0-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_0_missed, mlp_PSO_0_missed, "BP 0-layer", "PSO 0-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_0_missed, mlp_DE_0_missed, "GA 0-layer", "DE 0-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_0_missed, mlp_PSO_0_missed, "GA 0-layer", "PSO 0-layer")
+        ms.compareProbabilisticClassifiers(mlp_DE_0_missed, mlp_PSO_0_missed, "DE 0-layer", "PSO 0-layer")
 
-            ms.compareProbabilisticClassifiers(ae_1_mlp_missed, ae_2_mlp_missed, "MLP stacked on 1-layer Autoencoder", "MLP stacked on 2-layer Autoencoder")
-            ms.compareProbabilisticClassifiers(ae_1_mlp_missed, ae_3_mlp_missed, "MLP stacked on 1-layer Autoencoder", "MLP stacked on 3-layer Autoencoder")
+        # 1-layer
+        ms.compareProbabilisticClassifiers(mlp_BP_1_missed, mlp_GA_1_missed, "BP 1-layer", "GA 1-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_1_missed, mlp_DE_1_missed, "BP 1-layer", "DE 1-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_1_missed, mlp_PSO_1_missed, "BP 1-layer", "PSO 1-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_1_missed, mlp_DE_1_missed, "GA 1-layer", "DE 1-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_1_missed, mlp_PSO_1_missed, "GA 1-layer", "PSO 1-layer")
+        ms.compareProbabilisticClassifiers(mlp_DE_1_missed, mlp_PSO_1_missed, "DE 1-layer", "PSO 1-layer")
 
-            ms.compareProbabilisticClassifiers(ae_2_mlp_missed, ae_3_mlp_missed, "MLP stacked on 2-layer Autoencoder", "MLP stacked on 3-layer Autoencoder")
-
+        # 2-layer
+        ms.compareProbabilisticClassifiers(mlp_BP_2_missed, mlp_GA_2_missed, "BP 2-layer", "GA 2-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_2_missed, mlp_DE_2_missed, "BP 2-layer", "DE 2-layer")
+        ms.compareProbabilisticClassifiers(mlp_BP_2_missed, mlp_PSO_2_missed, "BP 2-layer", "PSO 2-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_2_missed, mlp_DE_2_missed, "GA 2-layer", "DE 2-layer")
+        ms.compareProbabilisticClassifiers(mlp_GA_2_missed, mlp_PSO_2_missed, "GA 2-layer", "PSO 2-layer")
+        ms.compareProbabilisticClassifiers(mlp_DE_2_missed, mlp_PSO_2_missed, "DE 2-layer", "PSO 2-layer")
 
 if(len(sys.argv) > 3):
     chunks, class_list = openFiles(sys.argv[1])
@@ -258,7 +325,7 @@ if(len(sys.argv) > 3):
     print("Using k=3")
     hidden_layer_nodes = []
     for i in range(3):
-        hidden_layer_nodes.append(5*(len(chunks[0][0])-1))
-    trainAndTest(chunks, class_list, 3, uses_regression, 1, hidden_layer_nodes, 0.3, 0.2, 200, tun)
+        hidden_layer_nodes.append(6*(len(chunks[0][0])-1))
+    trainAndTest(chunks, class_list, 3, uses_regression, 1, hidden_layer_nodes, 0.05, 0, 100, tun)
 else:
     print("Usage:\t<dataFile.data> <r> <tune/notune>(for regression, use any other character for classification)")
