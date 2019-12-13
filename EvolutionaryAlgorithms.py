@@ -2,7 +2,7 @@ import random
 import copy
 import MathAndStats as ms
 
-# implementation of the genetic algorithm to tune a feedforward network
+# implementation of the genetic algorithm to tune the weights of a feedforward network
 def generateFFNGA(mlp, training_set, validation_set, nodes_by_layer,
                   prob_cross, prob_mutation, mutation_variance, population_size, max_generations):
     population = initializePopulationFFN(mlp.out_k, nodes_by_layer, population_size, -1, 1)

@@ -2,6 +2,7 @@ import random
 import copy
 import MathAndStats as ms
 
+# tunes the weights of a feedforward network using gBest particle swarm optimization
 def generateFFNgBestPSO(mlp, training_set, validation_set, nodes_by_layer, omega, c1, c2,
                         population_size, max_time_steps):
     population = initializePopulationFFN(mlp.out_k, nodes_by_layer, population_size, -1, 1)
@@ -9,7 +10,7 @@ def generateFFNgBestPSO(mlp, training_set, validation_set, nodes_by_layer, omega
     population_fitness = evaluateGroupFitnessFFN(mlp, training_set, nodes_by_layer, population, mlp.output_type)
     pbest_positions = copy.deepcopy(population)
     pbest_fitnesses = copy.deepcopy(population_fitness)
-    # get global best
+    # get initial global best
     best_fitness_index = 0
     for index in range(1, len(population)):
         if population_fitness[index] > population_fitness[best_fitness_index]:

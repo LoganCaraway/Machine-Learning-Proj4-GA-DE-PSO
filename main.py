@@ -154,7 +154,7 @@ def trainAndTest(chunked_data, clss_list, k, use_regression, num_layers, hidden_
             mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
             PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
                                     [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
-                                    omega=0.8, c1=0.6, c2=0.6, population_size=40, max_time_steps=8000)
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=40, max_time_steps=3000)
             mlp_PSO_0_missed.append(ms.testRegressor(mlp, testing_set))
             # 1-layer
             mlp = ffn.FeedforwardNetwork(1, clss_list, "regression", True, False)
@@ -207,17 +207,17 @@ def trainAndTest(chunked_data, clss_list, k, use_regression, num_layers, hidden_
             ea.generateFFNGA(mlp, training_set[:validation_index], training_set[validation_index:],
                              [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
                              prob_cross=0.6, prob_mutation=0.01, mutation_variance=0.2, population_size=60,
-                             max_generations=300)
+                             max_generations=1000)
             mlp_GA_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
             mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
             ea.generateFFNDE(mlp, training_set[:validation_index], training_set[validation_index:],
                              [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
-                             prob_target=0.5, beta=0.5, population_size=40, max_generations=100)
+                             prob_target=0.5, beta=0.5, population_size=40, max_generations=1000)
             mlp_DE_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
             mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
             PSO.generateFFNgBestPSO(mlp, training_set[:validation_index], training_set[validation_index:],
                                     [len(chunks[0][0]) - 1] + hidden_layer_nodes[:0],
-                                    omega=0.8, c1=0.6, c2=0.6, population_size=50, max_time_steps=80)
+                                    omega=0.8, c1=0.6, c2=0.6, population_size=50, max_time_steps=3000)
             mlp_PSO_0_missed.append(ms.testProbabilisticClassifier(mlp, testing_set))
             # 1-layer
             mlp = ffn.FeedforwardNetwork(len(clss_list), clss_list, "classification", True, True)
@@ -325,7 +325,7 @@ if(len(sys.argv) > 3):
     print("Using k=3")
     hidden_layer_nodes = []
     for i in range(3):
-        hidden_layer_nodes.append(6*(len(chunks[0][0])-1))
+        hidden_layer_nodes.append(3*(len(chunks[0][0])-1))
     trainAndTest(chunks, class_list, 3, uses_regression, 1, hidden_layer_nodes, 0.05, 0, 100, tun)
 else:
     print("Usage:\t<dataFile.data> <r> <tune/notune>(for regression, use any other character for classification)")
